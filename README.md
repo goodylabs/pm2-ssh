@@ -1,5 +1,5 @@
-# pm2-ssh
-Easily connect to remote environment using pm2 settings
+# PM2 SSH
+Easily connect to remote environment using PM2 settings
 
 #### Connect to the 1st server from PM2 staging settings
 
