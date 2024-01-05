@@ -16,7 +16,7 @@ if [ ${#SSH} -lt 2 ]; then echo >&2 "I require 'ssh' but it's not installed."; e
 function show_help {
   echo ""
   echo "Usage: "
-  echo "$0 [environment] [server_number]"
+  echo "$0 [environment] [server_number] [-r for root login]"
   echo ""
 }
 
@@ -44,6 +44,12 @@ if [ "x${SERVER_NUMBER}" == "x" ]; then
   SERVER_NUMBER="1"
 fi
 
+ROOT_LOGIN="$2"
+
+if [ "x${ROOT_LOGIN}" == "x-r" ]; then
+  ROOT_LOGIN="1"
+fi
+
 SERVER_INDEX=$((${SERVER_NUMBER}-1))
 
 echo "Remote ENV: ${REMOTE_ENV}"
@@ -53,12 +59,16 @@ REMOTE_HOST=""
 REMOTE_USER=""
 
 REMOTE_HOST=`${JQ} -r ".deploy.${REMOTE_ENV}.host | if type == \"array\" then .[${SERVER_INDEX}] else . end" ${PM2_CONFIG_JSON_FILE}`
+echo "Remote host: ${REMOTE_HOST}"
 REMOTE_USER=`${JQ} -r ".deploy.${REMOTE_ENV}.user" ${PM2_CONFIG_JSON_FILE}`
 
-${RM} -f ${PM2_CONFIG_JSON_FILE}
+if [ "${ROOT_LOGIN}" == "1" ]; then
+  REMOTE_USER="root"
+fi
 
-echo "Remote host: ${REMOTE_HOST}"
 echo "Remote user: ${REMOTE_USER}"
+
+${RM} -f ${PM2_CONFIG_JSON_FILE}
 
 if [ "x${REMOTE_HOST}" == "xnull" ] || [ "x${REMOTE_USER}" == "xnull" ]; then echo "Unknown user or host - aborting !!!"; exit 1; fi
 
